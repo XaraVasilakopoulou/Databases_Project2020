@@ -1,0 +1,159 @@
+CREATE DATABASE project;
+USE project;
+
+/* Tables */
+
+CREATE TABLE efhmerida( 
+onoma VARCHAR (25) DEFAULT 'unknown' NOT NULL,
+idiokthths VARCHAR (25) DEFAULT 'uknown' NOT NULL,
+sux_ekdoshs INT (2) NOT NULL,
+PRIMARY KEY(onoma)
+);
+
+CREATE TABLE ergazomenos(
+onoma VARCHAR (25) DEFAULT 'unknown' NOT NULL,
+epitheto VARCHAR (25) DEFAULT 'unknown' NOT NULL,
+misthos FLOAT(5,2) NOT NULL,
+hm_proslhpshs DATE NOT NULL,
+email VARCHAR(255) NOT NULL,
+PRIMARY KEY(email)
+);
+
+CREATE TABLE dhmosiografos(
+ergazom_email VARCHAR(255) NOT NULL REFERENCES ergazomenos(email),
+proyphresia TEXT,
+biografiko TEXT NOT NULL,
+PRIMARY KEY( ergazom_email)
+);
+
+CREATE TABLE dioikitikos(
+ergazom_email VARCHAR(255) NOT NULL REFERENCES ergazomenos(email),
+kathikonta ENUM ('Secretary','Logistics'),
+thlefwno BIGINT (10)  NOT NULL,
+odos VARCHAR (25) DEFAULT 'unknown' NOT NULL,
+arithmos INT (4) DEFAULT '0' NOT NULL,
+polh VARCHAR (25) DEFAULT 'unknown' NOT NULL,
+PRIMARY KEY( ergazom_email)
+);
+
+CREATE TABLE arxisuntakths( 
+dioik_ergazom_email VARCHAR(255) NOT NULL REFERENCES dioikitikos(ergazom_email),
+PRIMARY KEY(dioik_ergazom_email)
+);
+
+CREATE TABLE fullo(
+selides INT(3) DEFAULT'30' NOT NULL,
+hm_kukloforias DATE NOT NULL,
+ar_fulloy INT (3) NOT NULL,
+onom_ekdoshs VARCHAR(25) NOT NULL,
+kathorisths_fullou VARCHAR(255) NOT NULL,
+antitupa INT(3) DEFAULT '0',
+antitupa_pisw INT(3)  DEFAULT '0',
+PRIMARY KEY(ar_fulloy,onom_ekdoshs),
+CONSTRAINT F_EFHMERIDAS 
+FOREIGN KEY (onom_ekdoshs) REFERENCES efhmerida(onoma)
+ON DELETE CASCADE ON UPDATE CASCADE,
+CONSTRAINT SYNTAKTHS
+FOREIGN KEY(kathorisths_fullou) REFERENCES arxisuntakths(dioik_ergazom_email)
+ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE kathgoria(
+kwdikos INT(3) NOT NULL,
+onoma SET('Politika','Oikonomika','Koinwnika','Kosmika','Athlhtika') NOT NULL,
+perigrafh TEXT NOT NULL,
+gonikh INT(3) NOT NULL REFERENCES kathgoria(kwdikos),
+PRIMARY KEY(kwdikos)
+);
+
+CREATE TABLE arthro(
+path VARCHAR(255) DEFAULT 'unknown' NOT NULL,
+titlos VARCHAR(25) DEFAULT 'unknown' NOT NULL,
+perilipsi VARCHAR(25) DEFAULT 'unknown' NOT NULL,
+leksi_kleidi VARCHAR(10) DEFAULT 'uknown' NOT NULL,
+arithmos_dhm INT(3) NOT NULL,
+kwd_kathgorias INT(3) NOT NULL,
+elegxos_arth ENUM('Egkrish','Aporripsh','Allagh','Epanelegxos') NOT NULL,
+hm_egkrisis DATE DEFAULT '0000-00-00' NOT NULL,
+pl_selides INT(2) DEFAULT '1' NOT NULL,
+arx_sel INT (3) NOT NULL,
+sxolia VARCHAR(255),
+PRIMARY KEY(path),
+CONSTRAINT DHMOSIEUMA
+FOREIGN KEY(arithmos_dhm) REFERENCES fullo(ar_fulloy)
+ON DELETE CASCADE ON UPDATE CASCADE,
+CONSTRAINT KATHGORIAK
+FOREIGN KEY(kwd_kathgorias) REFERENCES kathgoria(kwdikos)
+ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE elegxos(
+path_e VARCHAR(255) DEFAULT 'unknown' NOT NULL,
+dioik_ergazom_email_e VARCHAR(255) NOT NULL,
+PRIMARY KEY(path_e,dioik_ergazom_email_e),
+CONSTRAINT PATHE
+FOREIGN KEY(path_e) REFERENCES arthro(path)
+ON DELETE CASCADE ON UPDATE CASCADE,
+CONSTRAINT EMAILE
+FOREIGN KEY(dioik_ergazom_email_e) REFERENCES arxisuntakths(dioik_ergazom_email)
+ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+CREATE TABLE upobolh(
+path_u VARCHAR(255) DEFAULT 'unknown' NOT NULL,
+email_u VARCHAR(255) NOT NULL,
+hmeromhnia DATE NOT NULL,
+PRIMARY KEY(path_u,email_u),
+CONSTRAINT PATHH
+FOREIGN KEY(path_u) REFERENCES arthro(path)
+ON DELETE CASCADE ON UPDATE CASCADE,
+CONSTRAINT EMAILL
+FOREIGN KEY(email_u) REFERENCES arxisuntakths(dioik_ergazom_email)
+ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+/* Inserts */
+
+INSERT INTO efhmerida VALUES('Citizen','Xristopoylos','7');
+INSERT INTO efhmerida VALUES('P&C','Andreopoulos','30');
+
+INSERT INTO ergazomenos VALUES ('Mixalhs','Xristou','980.75','2014-3-10','mxristoy@gmail.com');
+INSERT INTO ergazomenos VALUES ('Andreas','Kontos','950.40','2000-5-23','kontos1@gmail.com');
+INSERT INTO ergazomenos VALUES ('Vasilhs','Vasileiou','990.80','2009-9-4','vasvas@gmail.com');
+INSERT INTO ergazomenos VALUES ('Matina','Mantarinaki','900.00','2004-3-9','mantarini@gmail.com');
+INSERT INTO ergazomenos VALUES ('Panagiota','Karraxisaridou','850.20', '2017-6-17','pegky_karra@gmail.com');
+INSERT INTO ergazomenos VALUES ('Konstantinos','Katakouzinos','990.88','2000-5-4','mpintes@gmail.com');
+
+INSERT INTO dhmosiografos VALUES ('mxristoy@gmail.com','megalh proyphresia','megalo biografiko');
+INSERT INTO dhmosiografos VALUES ('pegky_karra@gmail.com','mikrh proyphresia','mikro biografiko');
+
+INSERT INTO dioikitikos VALUES ('kontos1@gmail.com','Logistics','6975843261',DEFAULT,DEFAULT,'Athina');
+INSERT INTO dioikitikos VALUES ('vasvas@gmail.com','Logistics','6958586473',DEFAULT,DEFAULT,'Athina');
+INSERT INTO dioikitikos VALUES ('mantarini@gmail.com','Secretary','6915263489','ismhnhs','12','Thessaloniki');
+INSERT INTO dioikitikos VALUES ('mpintes@gmail.com','Secretary','6945462819','amarousioy','129','Athina');
+
+
+INSERT INTO arxisuntakths VALUES ('mantarini@gmail.com');
+INSERT INTO arxisuntakths VALUES ('mpintes@gmail.com');
+
+INSERT INTO fullo VALUES ('10','2001-5-5','19','Citizen','mantarini@gmail.com',12,default);
+INSERT INTO fullo VALUES ('12','2006-10-9','24','P&C','mpintes@gmail.com',10,default);
+
+INSERT INTO kathgoria VALUES ('15','Politika','sxoliasmos politikhs','2');
+INSERT INTO kathgoria  VALUES ('3','Koinwnika','sxoliasmos koinwnikwn gegonotwn','5');
+
+INSERT INTO arthro VALUES ('C:\monopati\arthro\...doc','titlos1','perilipsi1',DEFAULT,'19','3','Egkrish',DEFAULT,'3','5','No comments');
+INSERT INTO arthro VALUES ('C:\path\arthrou\...doc','titlos2','perilipsi2','Koinwnia','24','15','Allagh','2020-2-10',DEFAULT,'9','No comments');
+
+INSERT INTO upobolh VALUES ('C:\monopati\arthro\...doc','mantarini@gmail.com','2020-2-10');
+INSERT INTO upobolh VALUES ('C:\path\arthrou\...doc','mpintes@gmail.com','2020-2-8');
+
+INSERT INTO elegxos VALUES ('C:\monopati\arthro\...doc','mantarini@gmail.com');
+INSERT INTO elegxos VALUES ('C:\path\arthrou\...doc','mpintes@gmail.com');
+
+
+
+
+
+

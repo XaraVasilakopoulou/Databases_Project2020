@@ -1,0 +1,191 @@
+/* Procedures */
+DELIMITER $
+CREATE PROCEDURE c(IN mon INT,OUT mis FLOAT)
+BEGIN
+	DECLARE mis FLOAT(5,2);
+    DECLARE a FLOAT (5,2);
+    DECLARE finishedFlag INT;
+    DECLARE ccursor CURSOR FOR
+		SELECT misthos FROM ergazomenos;
+	DECLARE CONTINUE HANDLER FOR NOT FOUND SET finishedFlag=1;
+	OPEN ccursor;
+    SET finishedFlag=0;
+    REPEAT
+		FETCH ccursor INTO a;
+        IF (finishedFlag=0) THEN
+			SET mis=(a DIV 12) * mon;
+			SELECT mis;
+		END IF;
+	UNTIL(finishedFlag=1)
+    END REPEAT;
+    CLOSE ccursor;
+	
+END$
+
+DELIMITER ;
+
+DELIMITER $
+CREATE PROCEDURE d(OUT b INT)
+BEGIN
+	DECLARE b INT(3);
+    DECLARE a INT(3);
+    DECLARE ap INT(3);
+    DECLARE finishedFlag INT;
+    DECLARE dcursor CURSOR FOR
+		SELECT antitupa,antitupa_pisw FROM fullo;
+	DECLARE CONTINUE HANDLER FOR NOT FOUND SET finishedFlag=1;
+	OPEN dcursor;
+    SET finishedFlag=0;
+    REPEAT
+		FETCH dcursor INTO a,ap;
+		IF(finishedFlag=0) THEN
+            SET b=a-ap;
+            SELECT @b;
+            END IF;
+	UNTIL(finishedFlag=1)
+    end repeat;
+   
+    CLOSE dcursor;
+	
+END$
+
+DELIMITER ;
+
+
+DELIMITER $
+CREATE PROCEDURE a(IN ar INT, IN ono VARCHAR(255) )
+BEGIN
+	DECLARE selides INT;    
+	DECLARE synolo_selidwn INT;
+    DECLARE ypoloipo INT;
+	DECLARE finishedFlag INT;
+    DECLARE titl VARCHAR(255);
+    DECLARE epi VARCHAR(255);
+    DECLARE he DATE;
+    DECLARE ars INT;
+    DECLARE ps INT;
+    
+    begin
+    DECLARE dcursor CURSOR FOR
+		SELECT titlos,ergazom_email,hm_egkrisis,arx_sel,pl_selides     
+		FROM arthro    
+		INNER JOIN upobolh ON path_u=path 
+		INNER JOIN dhmosiografos ON email_u=ergazom_email
+		INNER JOIN fullo ON ar_fulloy=arithmos_dhm
+		INNER JOIN efhmerida ON onom_ekdoshs=onoma
+		WHERE ar_fulloy=ar AND onoma=ono 
+		ORDER BY arx_sel ASC;
+		DECLARE CONTINUE HANDLER FOR NOT FOUND SET finishedFlag=1;
+        OPEN dcursor;
+		SET finishedFlag=0;
+		REPEAT
+			FETCH dcursor INTO titl,epi,he,ars,ps;
+			SELECT selides FROM fullo INTO synolo_selidwn;	
+			SET ypoloipo=selides - ps;
+			IF ps<selides THEN
+			SELECT ypoloipo;
+			END IF ;
+			UNTIL(finishedFlag=1)
+			end repeat;
+        end;
+        
+        begin
+			DECLARE bcursor CURSOR FOR
+			SELECT ar_fulloy FROM fullo;
+			DECLARE CONTINUE HANDLER FOR NOT FOUND SET finishedFlag=1;
+            OPEN bcursor;
+			SET finishedFlag=0;
+			REPEAT
+			FETCH bcursor INTO ar;
+			SELECT selides FROM fullo INTO synolo_selidwn;	
+			SET ypoloipo=selides - ps;
+			IF ps<selides THEN
+			SELECT ypoloipo;
+			END IF ;
+			UNTIL(finishedFlag=1)
+			end repeat;
+        end;
+        begin   
+			DECLARE ccursor CURSOR FOR
+			SELECT onoma FROM efhmerida;
+			DECLARE CONTINUE HANDLER FOR NOT FOUND SET finishedFlag=1;
+			OPEN ccursor;
+			SET finishedFlag=0;
+			REPEAT
+			FETCH ccursor INTO ono;
+			SELECT selides FROM fullo INTO synolo_selidwn;	
+			SET ypoloipo=selides - ps;
+			IF ps<selides THEN
+			SELECT ypoloipo;
+			END IF ;
+			UNTIL(finishedFlag=1)
+			end repeat;
+            end;
+END $
+DELIMITER ;
+
+
+
+DELIMITER $
+CREATE PROCEDURE b(IN em VARCHAR(255),OUT mis FLOAT)
+BEGIN
+	DECLARE hp DATE;
+    DECLARE mist float;
+	DECLARE mis FLOAT;
+    DECLARE Diff INT;
+	
+		SELECT hm_proslhpshs,misthos,email FROM ergazomenos WHERE em=email INTO hp,mist,em;
+       
+		SET Diff=(CURDATE() - hp);
+		SET mis = mist+Diff DIV 12 *0.005;
+		SELECT mis;
+		UPDATE ergazomenos SET misthos=mis
+		WHERE email=em;
+END$
+DELIMITER ;
+
+/* Triggers */
+
+DELIMITER $
+CREATE TRIGGER neos_ypallhlos
+AFTER INSERT ON ergazomenos
+FOR EACH ROW 
+BEGIN
+DECLARE mis FLOAT;
+SET mis=(650,00);
+SET mis=misthos;
+END$
+DELIMITER ;
+
+DELIMITER $
+CREATE TRIGGER nea_eggrafh
+AFTER INSERT ON upobolh
+FOR EACH ROW
+BEGIN
+DECLARE dee VARCHAR(255);
+DECLARE ee VARCHAR(255);
+DECLARE e_a ENUM('Egkrish','Aporripsh','Allagh','Epanelegxos');
+SELECT ergazom_email FROM dioikitikos INTO ee;
+SELECT dioik_ergazom_email FROM arxisuntakths INTO dee;
+SET e_a = 'Egkrish';
+IF ergazom_email=dioik_ergazom_email THEN
+UPDATE arthro SET elegxos_arth = e_a;
+END IF;
+END $
+DELIMITER ;
+
+
+DELIMITER $
+CREATE TRIGGER elegxos_xwrou
+BEFORE INSERT ON fullo
+FOR EACH ROW
+BEGIN
+DECLARE ps INT;
+DECLARE sel INT;
+SELECT pl_selides FROM arhtro INTO ps;
+SELECT selides FROM fullo INTO sel;
+IF ps>sel THEN
+	SIGNAL SQLSTATE '02000' SET MESSAGE_TEXT = 'Δεν υπάρχει ο απαραίτητος χώρος σε σελίδες';
+END  IF;
+END$
+DELIMITER ;
